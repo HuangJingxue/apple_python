@@ -1,4 +1,3 @@
-```python
 def human_byte(bytes):
     """
     文件大小自适应
@@ -54,4 +53,4 @@ def human_time(times):
         human_times = '%.0fms' % times
 
     return human_times
-    ```
+
