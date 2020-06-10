@@ -1,39 +1,54 @@
 {% extends 'admin/master.html' %}
 {% block body %}
 {{ super() }}
-<div class="row-fluid">
 
-    <div>
-        {% if current_user.is_authenticated %}
-        <h1>工作管理系统</h1>
-        <p class="lead">
-            登陆成功
-        </p>
-        <p>
-            开始管理你的工作.
-        </p>
-        {% else %}
-        <form method="POST" action="">
-            {{ form.hidden_tag() if form.hidden_tag }}
-            {% for f in form if f.type != 'CSRFTokenField' %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-offset-3 col-md-6">
             <div>
-            {{ f.label }}
-            {{ f }}
-            {% if f.errors %}
-            <ul>
-                {% for e in f.errors %}
-                <li>{{ e }}</li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-            </div>
-            {% endfor %}
-            <button class="btn" type="submit">Submit</button>
-        </form>
-        {{ link | safe }}
-        {% endif %}
-    </div>
+                {% if current_user.is_authenticated %}
+                <h1>数据库团队后台管理系统</h1>
+                <p class="lead">
+                    登陆成功
+                </p>
+                <p>
+                    开始管理你的数据.
+                </p>
+                {% else %}
 
-    <a class="btn btn-primary" href="/"><i class="icon-arrow-left icon-white"></i> Back</a>
+                <form class="form-horizontal" method="POST" action="">
+                    <h2 class="form-signin-heading">Please sign in with your username</h2>
+                    {{ form.hidden_tag() if form.hidden_tag }}
+                    {% for f in form if f.type != 'CSRFTokenField' %}
+                    <div class="form-group">
+                        <div class="col-md-2 control-label">
+                            {{ f.label }}
+                        </div>
+                        <div class="col-md-4 control-label">
+                            {{ f }}
+                        </div>
+                        {% if f.errors %}
+                        <ul>
+                            {% for e in f.errors %}
+                            <li>{{ e }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    <div class="col-md-6 control-label">
+                        <button class="btn btn-primary" type="submit">Sign In</button>
+                    </div>
+                    <div class=" form-group  col-md-9 control-label">
+                        {{ link | safe }}
+                    </div>
+                </form>
+
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
-{% endblock body %}
+
+{% endblock %}
