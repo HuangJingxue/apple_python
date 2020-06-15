@@ -11,11 +11,17 @@ class Config(object):
 class ProdConfig(Config):
     """Production config class."""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://supercloud_web:Zyadmin@123@10.0.0.29:3306/supercloud?charset=UTF8MB4'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root123@127.0.0.1:3306/myweb?charset=UTF8MB4'
 
 
 class DevConfig(Config):
     """Development config class."""
     # Open the DEBUG
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://supercloud_dev:Zyadmin@123@10.0.0.29:3306/supercloud_dev?charset=UTF8MB4'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root123@127.0.0.1:3306/myweb?charset=UTF8MB4'
+    URL = '127.0.0.1'
+    PORT = 3306
+    USERNAME = 'root'
+    PASSWORD = 'root123'
+    DBNAME = 'myweb'
+    ENGINE = 'mysql'

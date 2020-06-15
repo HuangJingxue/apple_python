@@ -106,7 +106,7 @@ class RegistrationForm(form.Form):
 
 
 # Initialize flask-login
-def init_login():
+def init_login(app):
     login_manager = login.LoginManager()
     login_manager.init_app(app)
 
