@@ -6,6 +6,9 @@
     </content>
     <orderEntry type="jdk" jdkName="Python 3.7 (data_analysis)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="common-tools-of-hybrid-cloud-database" />
+    <orderEntry type="module" module-name="SuperCloud" />
+    <orderEntry type="module" module-name="QingYu" />
   </component>
   <component name="TestRunnerService">
     <option name="PROJECT_TEST_RUNNER" value="Unittests" />

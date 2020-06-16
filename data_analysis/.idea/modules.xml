@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../QingYu/.idea/QingYu.iml" filepath="$PROJECT_DIR$/../QingYu/.idea/QingYu.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../supercloud/.idea/SuperCloud.iml" filepath="$PROJECT_DIR$/../../supercloud/.idea/SuperCloud.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../04_gitlab仓库1/common-tools-of-hybrid-cloud-database/.idea/common-tools-of-hybrid-cloud-database.iml" filepath="$PROJECT_DIR$/../../../04_gitlab仓库1/common-tools-of-hybrid-cloud-database/.idea/common-tools-of-hybrid-cloud-database.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/data_analysis.iml" filepath="$PROJECT_DIR$/.idea/data_analysis.iml" />
     </modules>
   </component>
