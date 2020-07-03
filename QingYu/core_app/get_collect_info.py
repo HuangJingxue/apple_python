@@ -7,17 +7,75 @@ import decimal
 import os
 import json
 import time
-import locale
+#import locale
+import io
+import zipfile
+import shutil
 # 3rd-part Modules
 import argparse
 import pymysql
 import xlsxwriter
-import sys
-defaultencoding = 'utf-8'
-if sys.getdefaultencoding() != defaultencoding:
-    reload(sys)
-    sys.setdefaultencoding(defaultencoding)
+#import sys
+from jinja2 import Template
+
+#defaultencoding = 'utf-8'
+#if sys.getdefaultencoding() != defaultencoding:
+#    reload(sys)
+#    sys.setdefaultencoding(defaultencoding)
 now_date = time.strftime('%Y%m%d', time.localtime())
+
+class OSHelper:
+    def __init__(self):
+        pass
+
+    def mkdir(self, path):
+        """
+        在当前目录下创建子目录
+        """
+        try:
+            os.makedirs(path)
+        except Exception as e:
+            print(str(e))
+            return path
+        else:
+            return path
+
+    def rmdir(self, path):
+        """
+        递归删除目录
+        """
+        try:
+            shutil.rmtree(path)
+        except Exception as e:
+            print(str(e))
+            return path
+        else:
+            return path
+
+    def rmfile(self, path):
+        """
+        删除文件
+        """
+        try:
+            os.remove(path)
+        except Exception as e:
+            print(str(e))
+            return path
+        else:
+            return path
+
+
+def make_zip(source_dir, output_filename):
+    # 打包目录为zip文件（未压缩）
+    zipf = zipfile.ZipFile(output_filename, 'w')
+    pre_len = len(os.path.dirname(source_dir))
+    for parent, dirnames, filenames in os.walk(source_dir):
+        for filename in filenames:
+            pathfile = os.path.join(parent, filename)
+            arcname = pathfile[pre_len:].strip(os.path.sep)  # 相对路径
+            zipf.write(pathfile, arcname)
+    zipf.close()
+    return output_filename
 
 # 1.连接MySQL数据库
 class CJsonEncoder(json.JSONEncoder):
@@ -126,33 +184,121 @@ class Outputexcel():
     def write_close(self):
         self.workbook.close()
 
+# 3.2 渲染到markdown
+class GetReadme:
+    """
+    渲染视图模板Readme到前端
+    """
+
+    def __init__(self, **kwargs):
+        self.render_data = kwargs
+
+    def render_template(self):
+        template_data = """{% for _data in data %}# {{_data.collector}}采集器说明
+## 简介
+采集 {{_data.collector}} 监控指标上报到DataFlux中
+
+## 前置条件
+- 已安装Datakit [DataKit 安装文档](https://help.dataflux.cn/doc/0c6ebce225784bd2ad994d5f89c5dbc89e025792)
+
+## 配置
+{{_data.collector}}数据库授权监控账号
+```sql
+```
+
+配置好后，重启 DataKit 即可生效。
+```shell
+systemctl restart datakit
+```
+
+## 采集指标
+{{_data.fields}}
+
+{% endfor %}
+        """
+        template = Template(template_data)
+        return template.render(**self.render_data)
+
+    def maker(self, out_dir, collector):
+        file_name = '{}.md'.format(collector)
+        result = self.render_template()
+        with io.open('{}/{}'.format(out_dir, file_name), 'w', encoding='utf-8') as f:
+            f.write(result)
+
 
 # 4.将SQL内容输入到sheet当中输出
 def startup(**kwargs):
+    out_type = kwargs['out_type']
     params = {
         'url': kwargs['url'],
         'port': kwargs['port'],
         'username': kwargs['username'],
         'password': kwargs['password'],
         'dbname': kwargs['dbname'],
-        'collector': kwargs['collector'],
+        'collector': kwargs['collectors'],
     }
-    # 1.根据传递的参数对报告后端逻辑进行过滤
-    info_api = MysqlInfo(params['collector'])
-    sql_list = info_api.get_info()
-    # print(json.dumps(sql_list, indent=2, ensure_ascii=False))
+    # 删除历史输出文件
+    os_api = OSHelper()
+    directory = os.getcwd()
+    dir_name = 'out_put'
+    zip_name = '.'.join([dir_name, 'zip'])
+    path = os.path.join(directory, dir_name)
+    path_zip = os.path.join(directory, zip_name)
+    os_api.rmdir(path)
+    os_api.rmfile(path_zip)
+    dir_name = os_api.mkdir(dir_name)
+    # print(dir_name)
+    for collector in kwargs['collectors']:
+        params_excel = {
+            'collector': collector,
+            'dir_name': dir_name,
+        }
+        # 1.根据传递的参数对报告后端逻辑进行过滤
+        info_api = MysqlInfo(collector)
+        sql_list = info_api.get_info()
+        # print(json.dumps(sql_list, indent=2, ensure_ascii=False))
 
-    # 2.获取待渲染的报告数据
-    mysql_api = MysqlHelper(**params)
-    excel_api = Outputexcel(**params)
-    for sql in sql_list:
-        # print(sql["query"])
-        sql_result = mysql_api.col_query(sql["query"])
-        # 3.渲染报告
-        excel_api.add_sheet(sql["desc"], sql["fields"], sql["list_keys"], sql_result)
-    excel_api.write_close()
-    return excel_api.file_name
+        # 2.获取待渲染的报告数据
+        mysql_api = MysqlHelper(**params)
 
+        if out_type == 'excel':
+            excel_api = Outputexcel(**params_excel)
+            for sql in sql_list:
+                # print(sql["query"])
+                sql_result = mysql_api.col_query(sql["query"])
+                # 3.渲染报告
+                excel_api.add_sheet(sql["desc"], sql["fields"], sql["list_keys"], sql_result)
+            excel_api.write_close()
+        elif out_type == 'markdown':
+            new_filed = ''
+            for sql in sql_list:
+                head = sql['fields']
+                num = len(head)
+                head_line = ['----']
+                head_lines = head_line * num
+                new_filed = '{}{}\n{}\n{}'.format(new_filed, sql['desc'], '|'.join(head), '|'.join(head_lines))
+                sql_result = mysql_api.col_query(sql["query"])
+                for sqlr in sql_result:
+                    new_filed = '{}\n{}'.format(new_filed, '|'.join(
+                        list(map(lambda x: x if isinstance(x, str) else '',sqlr))
+                    ))
+                new_filed = '{}\n'.format(new_filed)
+            data = [{'collector': collector,
+                     'fields': new_filed
+                     }]
+
+            temp_data = {
+                'data': data,
+            }
+
+            # print(temp_data)
+
+            report = GetReadme(**temp_data)
+            report.maker(path, collector)
+
+    # 打包
+    zip_file = make_zip(dir_name, '.'.join([dir_name, 'zip']))
+    return zip_file
 
 if __name__ == "__main__":
     # 测试

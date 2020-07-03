@@ -11,17 +11,16 @@ class Config(object):
 class ProdConfig(Config):
     """Production config class."""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root123@127.0.0.1:3306/myweb?charset=UTF8MB4'
 
 
 class DevConfig(Config):
     """Development config class."""
     # Open the DEBUG
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root123@127.0.0.1:3306/myweb?charset=UTF8MB4'
-    URL = '127.0.0.1'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:hjx123@106.15.91.40:3306/myweb?charset=UTF8MB4'
+    URL = '106.15.91.40'
     PORT = 3306
     USERNAME = 'root'
-    PASSWORD = 'root123'
+    PASSWORD = 'hjx123'
     DBNAME = 'myweb'
     ENGINE = 'mysql'

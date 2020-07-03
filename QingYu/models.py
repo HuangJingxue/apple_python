@@ -58,9 +58,9 @@ class User(db.Model):
     def __unicode__(self):
         return self.username
 
-# 业务需求表
-class BusinessRequire(db.Model):
-    __tablename__ = 'business_require'
+# 阅读
+class Read(db.Model):
+    __tablename__ = 'read'
     id = db.Column(db.Integer, primary_key=True)
     business = db.Column(db.String(255), comment='业务名')
     requires = db.Column(db.String(255), comment='业务需求')
@@ -71,6 +71,88 @@ class BusinessRequire(db.Model):
     uuid = db.Column(db.String(32), default=uuid, unique=True, comment='UUID')
     is_deleted = db.Column(db.Integer)
     delete_time = db.Column(db.DateTime)
+
+# 健身
+class BodyBuilding(db.Model):
+    __tablename__ = 'bbuilding'
+    id = db.Column(db.Integer, primary_key=True)
+    business = db.Column(db.String(255), comment='业务名')
+    requires = db.Column(db.String(255), comment='业务需求')
+    requires_sql = db.Column(db.String(255), comment='业务需求SQL')
+    requestor = db.Column(db.String(255), comment='需求人')
+    create_time = db.Column(db.DateTime, nullable=True, default=datetime.now, comment='创建时间')
+    update_time = db.Column(db.DateTime, nullable=True, default=datetime.now, onupdate=datetime.now, comment='修改时间')
+    uuid = db.Column(db.String(32), default=uuid, unique=True, comment='UUID')
+    is_deleted = db.Column(db.Integer)
+    delete_time = db.Column(db.DateTime)
+
+# 理财渠道
+class FinancialChannel(db.Model):
+    __tablename__ = 'fchannel'
+    id = db.Column(db.Integer, primary_key=True)
+    channelname = db.Column(db.String(255), comment='渠道名称')
+    info = db.Column(db.String(255), comment='说明')
+    create_time = db.Column(db.DateTime, nullable=True, default=datetime.now, comment='创建时间')
+    update_time = db.Column(db.DateTime, nullable=True, default=datetime.now, onupdate=datetime.now, comment='修改时间')
+    uuid = db.Column(db.String(32), default=uuid, unique=True, comment='UUID')
+    is_deleted = db.Column(db.Integer)
+    delete_time = db.Column(db.DateTime)
+
+    fchannels = db.relationship("FinancialInfo", backref="fchannel")
+
+
+    def __repr__(self):
+        result = []
+        for i in (self.id, self.channelname):
+            if i:
+                result.append(str(i))
+            else:
+                continue
+        self.new_name = ','.join(result)
+        return self.new_name
+
+
+# 理财类型
+class FinancialType(db.Model):
+    __tablename__ = 'ftype'
+    id = db.Column(db.Integer, primary_key=True)
+    typename = db.Column(db.String(255), comment='类型名称')
+    info = db.Column(db.String(255), comment='说明')
+    create_time = db.Column(db.DateTime, nullable=True, default=datetime.now, comment='创建时间')
+    update_time = db.Column(db.DateTime, nullable=True, default=datetime.now, onupdate=datetime.now, comment='修改时间')
+    uuid = db.Column(db.String(32), default=uuid, unique=True, comment='UUID')
+    is_deleted = db.Column(db.Integer)
+    delete_time = db.Column(db.DateTime)
+    ftypes = db.relationship("FinancialInfo", backref="ftype")
+
+    def __repr__(self):
+        result = []
+        for i in (self.id, self.typename):
+            if i:
+                result.append(str(i))
+            else:
+                continue
+        self.new_name = ','.join(result)
+        return self.new_name
+
+
+# 理财明细
+class FinancialInfo(db.Model):
+    __tablename__ = 'finfo'
+    id = db.Column(db.Integer, primary_key=True)
+    channelid = db.Column(db.Integer, comment='渠道ID')
+    typeid = db.Column(db.Integer, comment='类型ID')
+    fundname = db.Column(db.String(255), comment='基金名称')
+    amount = db.Column(db.Integer, comment='金额')
+    status = db.Column(db.String(255), comment='状态')
+    info = db.Column(db.String(255), comment='备注')
+    create_time = db.Column(db.DateTime, nullable=True, default=datetime.now, comment='创建时间')
+    update_time = db.Column(db.DateTime, nullable=True, default=datetime.now, onupdate=datetime.now, comment='修改时间')
+    uuid = db.Column(db.String(32), default=uuid, unique=True, comment='UUID')
+    is_deleted = db.Column(db.Integer)
+    delete_time = db.Column(db.DateTime)
+    channelid = db.Column(db.Integer, db.ForeignKey('fchannel.id'))
+    typeid = db.Column(db.Integer, db.ForeignKey('ftype.id'))
 
 # Define login and registration forms (for flask-login)
 class LoginForm(form.Form):
